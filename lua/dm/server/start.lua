@@ -15,7 +15,8 @@ hook.Add("MinigamesGameStarted","testowy",function()
 end)
 
 function startFirstDM()
-	timer.Create( "EndDmGame", 5*60, 0, function() endDmGame() end )
+	-- timer.Create( "EndDmGame", 5*60, 0, function() endDmGame() end )
+	timer.Simple( 5*60, function() endDmGame() end )
 	DM.countDeaths = 0
 	DM.stats = {}
 	DM.spawns = Minigames.buildingMode.getActualMinigameSpawns()
