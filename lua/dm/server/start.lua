@@ -12,7 +12,8 @@ hook.Add("MinigamesGameStarted","testowy",function()
 end)
 
 function startFirstDM()
-	timer.Simple( 5*60, function() endDmGame() end )
+	-- timer.Simple( 5*60, function() endDmGame() end )
+	timer.Create("DMTimerEnd",5*60,1,function() endDmGame() end)
 	-- timer.Simple( 10, function() endDmGame() end )
 	DM.countDeaths = 0
 	DM.stats = {}
@@ -31,6 +32,12 @@ function startFirstDM()
 		DM.stats[k].kills = 0
 	end
 end
+
+hook.Add("minigameEndGameCommand","DmCustomEnd",function()
+	timer.Stop("DMTimerEnd")
+	endDmGame()
+	return
+end)
 
 hook.Add("PlayerDeath","EndGame",function(ply,attacker)
 	if Minigames.ActualGame == "deathmatch" then
