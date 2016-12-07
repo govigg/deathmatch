@@ -17,7 +17,7 @@ function startFirstDM()
 	DM.countDeaths = 0
 	DM.stats = {}
 	DM.beforeWeapons = {}
-	DM.weapons = {"weapon_ar2","weapon_frag"}
+	DM.weapons = {"weapon_ar2","weapon_frag","weapon_crowbar"}
 	DM.spawns = Minigames.buildingMode.getActualMinigameSpawns()
 	for i,k in pairs(Minigames.PlayersQue) do
 		DM.beforeWeapons[k] = {}
