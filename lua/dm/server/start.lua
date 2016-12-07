@@ -2,9 +2,6 @@
 -- Gracz dostaje crowbara za każdym razem jak ginie i spawnowany jest na jednej z pozycji spawna --
 -- Gra kończy się po 5 minutach (14 linijka) --
 -- Wybierany jest zwycięzca i wypisywany do konsoli --
--- Do tego dopisany jest tutaj anty noclip --
-
--- Nie testowałem losowania zwycięzcy --
 
 local DM = {}
 
@@ -15,12 +12,18 @@ hook.Add("MinigamesGameStarted","testowy",function()
 end)
 
 function startFirstDM()
-	-- timer.Create( "EndDmGame", 5*60, 0, function() endDmGame() end )
 	timer.Simple( 5*60, function() endDmGame() end )
+	-- timer.Simple( 10, function() endDmGame() end )
 	DM.countDeaths = 0
 	DM.stats = {}
+	DM.beforeWeapons = {}
+	DM.weapons = {"weapon_ar2","weapon_frag"}
 	DM.spawns = Minigames.buildingMode.getActualMinigameSpawns()
 	for i,k in pairs(Minigames.PlayersQue) do
+		DM.beforeWeapons[k] = {}
+		for z,p in pairs(k:GetWeapons()) do
+			table.insert(DM.beforeWeapons[k],p:GetClass())
+		end
 		dmSpawnPly(k)
 			-- Reset stats
 		DM.stats[k] = {}
@@ -48,6 +51,7 @@ hook.Add("PlayerSpawn","SpawnDm",function(ply)
 	end
 end)
 
+-- Zabrania noclipa
 hook.Add("PlayerNoClip","DmNoclip",function(ply)
 	if Minigames.ActualGame == "deathmatch" then
 		if Minigames.isPlayerInGame(ply) then
@@ -56,10 +60,40 @@ hook.Add("PlayerNoClip","DmNoclip",function(ply)
 	end
 end)
 
+-- Zaprania spawnowania propów
+hook.Add("PlayerSpawnProp","DmSPawnProp",function(ply)
+	if Minigames.ActualGame == "deathmatch" then
+		if Minigames.isPlayerInGame(ply) then
+			return false
+		end
+	end
+end)
+-- Zabrania spawnowania broni
+hook.Add("PlayerSpawnSWEP","DmSPawnWeapon",function(ply)
+	if Minigames.ActualGame == "deathmatch" then
+		if Minigames.isPlayerInGame(ply) then
+			return false
+		end
+	end
+end)
+hook.Add("PlayerCanPickupWeapon","DmSPawnPickup",function(ply, wep)
+	if Minigames.ActualGame == "deathmatch" then
+		if Minigames.isPlayerInGame(ply) then
+			-- DM.weapons
+			local wepC = wep:GetClass()
+			if table.HasValue(DM.weapons,wepC) == false then
+				return false
+			end
+		end
+	end
+end)
+
 function dmSpawnPly(ply)
 -- Reset weapons
 	ply:StripWeapons()
-	ply:Give("weapon_crowbar")
+	for i,k in pairs(DM.weapons) do
+		ply:Give(k)
+	end
 	-- Spawn players
 	local rand = math.Rand(1,table.Count(DM.spawns))
 	rand = math.floor(rand)
@@ -68,6 +102,13 @@ function dmSpawnPly(ply)
 
 	ply:SetPos(rSpawn.pos)
 	ply:SetAngles(Angle(0,rSpawn.ang,0))
+end
+
+function playerExit(ply)
+	ply:StripWeapons()
+	for i,k in pairs(DM.beforeWeapons[ply]) do
+		ply:Give(k)
+	end
 end
 
 function endDmGame()
@@ -79,5 +120,9 @@ function endDmGame()
 	if plywin ~= nil then
 		print("[Minigry] Event wygrał " .. plywin:GetName() .. " zabijając " .. maxK .. " graczy.")
 	end
+	local qP = Minigames.PlayersQue
 	Minigames.endGame()
+	for i,k in pairs(qP) do
+		playerExit(k)
+	end
 end
