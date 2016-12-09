@@ -18,7 +18,7 @@ function startFirstDM()
 	DM.countDeaths = 0
 	DM.stats = {}
 	DM.beforeWeapons = {}
-	DM.weapons = {"weapon_ar2","weapon_frag","weapon_crowbar"}
+	DM.weapons = Minigames.GameConfig.weapons
 	DM.spawns = Minigames.buildingMode.getActualMinigameSpawns()
 	for i,k in pairs(Minigames.PlayersQue) do
 		DM.beforeWeapons[k] = {}
@@ -34,9 +34,11 @@ function startFirstDM()
 end
 
 hook.Add("minigameEndGameCommand","DmCustomEnd",function()
-	timer.Stop("DMTimerEnd")
-	endDmGame()
-	return
+	if Minigames.ActualGame == "deathmatch" then
+		timer.Stop("DMTimerEnd")
+		endDmGame()
+		return
+	end
 end)
 
 hook.Add("PlayerDeath","EndGame",function(ply,attacker)
@@ -88,18 +90,28 @@ hook.Add("PlayerCanPickupWeapon","DmSPawnPickup",function(ply, wep)
 		if Minigames.isPlayerInGame(ply) then
 			-- DM.weapons
 			local wepC = wep:GetClass()
-			if table.HasValue(DM.weapons,wepC) == false then
+			if weaponAvilable(wepC) == false then
 				return false
 			end
 		end
 	end
 end)
 
+function weaponAvilable(weaponName)
+	for i,k in pairs(DM.weapons) do
+		if k.ClassName == weaponName then return true end
+	end
+	return true
+end
+
 function dmSpawnPly(ply)
 -- Reset weapons
 	ply:StripWeapons()
 	for i,k in pairs(DM.weapons) do
-		ply:Give(k)
+		ply:Give(k.ClassName)
+		if k.AmmoStart ~= nil and k.AmmoStart > 0 and k.PrimaryAmmoType ~= nil then
+			ply:SetAmmo(k.AmmoStart,k.PrimaryAmmoType)
+		end
 	end
 	-- Spawn players
 	local rand = math.Rand(1,table.Count(DM.spawns))
