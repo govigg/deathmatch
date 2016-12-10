@@ -4,6 +4,22 @@ Minigames.addGamemode("deathmatch",{
 	["name"]="DeathMatch",
 	["pickWeapons"] = true,
 	["defaultWeapons"] = {
-		{ClassName="fas2_m3s90",AmmoStart=40}
+		{ClassName="weapon_crowbar",AmmoStart=40}
+	},
+	config = {
+		time = {
+			type= "number",
+			tag = "Czas gry [min]",
+			default = 3
+		},
+		hp = {
+			type="number",
+			tag = "Życie",
+			default = 100
+		}
 	}
 })
+
+-- config avilable fields --
+-- text:	type, [tag], [default]
+-- number:	type, [tag], [deafult]

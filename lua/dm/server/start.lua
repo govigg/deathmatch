@@ -12,9 +12,12 @@ hook.Add("MinigamesGameStarted","testowy",function()
 end)
 
 function startFirstDM()
-	-- timer.Simple( 5*60, function() endDmGame() end )
-	timer.Create("DMTimerEnd",5*60,1,function() endDmGame() end)
-	-- timer.Simple( 10, function() endDmGame() end )
+	DM.Config = Minigames.GameConfig.config
+	local roundTime = 3
+	if DM.Config.time >= 1 then
+		roundTime = DM.Config.time
+	end
+	timer.Create("DMTimerEnd",roundTime*60,1,function() endDmGame() end)
 	DM.countDeaths = 0
 	DM.stats = {}
 	DM.beforeWeapons = {}
@@ -26,7 +29,6 @@ function startFirstDM()
 			table.insert(DM.beforeWeapons[k],p:GetClass())
 		end
 		dmSpawnPly(k)
-			-- Reset stats
 		DM.stats[k] = {}
 		DM.stats[k].deaths = 0
 		DM.stats[k].kills = 0
@@ -39,6 +41,11 @@ hook.Add("minigameEndGameCommand","DmCustomEnd",function()
 		endDmGame()
 		return
 	end
+end)
+
+hook.Add("minigamesPlayerLeave","PlayerLeave",function(ply)
+	print("lel")
+	playerExit(ply)
 end)
 
 hook.Add("PlayerDeath","EndGame",function(ply,attacker)
@@ -107,6 +114,7 @@ end
 function dmSpawnPly(ply)
 -- Reset weapons
 	ply:StripWeapons()
+	if DM.weapons == nil then DM.weapons = {} end
 	for i,k in pairs(DM.weapons) do
 		ply:Give(k.ClassName)
 		if k.AmmoStart ~= nil and k.AmmoStart > 0 and k.PrimaryAmmoType ~= nil then
@@ -118,7 +126,9 @@ function dmSpawnPly(ply)
 	rand = math.floor(rand)
 
 	local rSpawn = DM.spawns[rand]
-
+print(DM.Config.hp)
+	ply:SetMaxHealth(DM.Config.hp)
+	ply:SetHealth(DM.Config.hp)
 	ply:SetPos(rSpawn.pos)
 	ply:SetAngles(Angle(0,rSpawn.ang,0))
 end
