@@ -21,10 +21,12 @@ function startFirstDM()
 	DM.countDeaths = 0
 	DM.stats = {}
 	DM.beforeWeapons = {}
+	DM.beforePos = {}
 	DM.weapons = Minigames.GameConfig.weapons
 	DM.spawns = Minigames.buildingMode.getActualMinigameSpawns()
 	for i,k in pairs(Minigames.PlayersQue) do
 		DM.beforeWeapons[k] = {}
+		DM.beforePos[k] = k:GetPos()
 		for z,p in pairs(k:GetWeapons()) do
 			table.insert(DM.beforeWeapons[k],p:GetClass())
 		end
@@ -137,6 +139,7 @@ end
 
 function playerExit(ply)
 	ply:StripWeapons()
+	ply:SetPos(DM.beforePos[ply])
 	for i,k in pairs(DM.beforeWeapons[ply]) do
 		ply:Give(k)
 	end
