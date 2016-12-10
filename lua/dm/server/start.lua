@@ -44,8 +44,10 @@ hook.Add("minigameEndGameCommand","DmCustomEnd",function()
 end)
 
 hook.Add("minigamesPlayerLeave","PlayerLeave",function(ply)
-	print("lel")
-	playerExit(ply)
+	-- print("lel")
+	if Minigames.ActualGame == "deathmatch" then
+		playerExit(ply)
+	end
 end)
 
 hook.Add("PlayerDeath","EndGame",function(ply,attacker)
@@ -126,7 +128,7 @@ function dmSpawnPly(ply)
 	rand = math.floor(rand)
 
 	local rSpawn = DM.spawns[rand]
-print(DM.Config.hp)
+-- print(DM.Config.hp)
 	ply:SetMaxHealth(DM.Config.hp)
 	ply:SetHealth(DM.Config.hp)
 	ply:SetPos(rSpawn.pos)
